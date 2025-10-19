@@ -1,0 +1,332 @@
+<!-- Header Section -->
+<header class="header">
+  <h1>📦 Product Management System</h1>
+  <p>Manage your products efficiently and effectively</p>
+</header>
+
+<!-- Search Section -->
+<section class="search-section">
+  <div class="search-container">
+    <input
+      type="text"
+      placeholder="🔍 Search by product name, unit, price, ID..."
+      [(ngModel)]="searchTerm"
+      (input)="searchProducts()"
+      (keyup.enter)="searchProducts()"
+      class="search-input" />
+
+    <button class="btn btn-search" type="button" (click)="searchProducts()">
+      Search
+    </button>
+    <button *ngIf="searchTerm" class="btn btn-clear" type="button" (click)="clearSearch()">
+      Clear
+    </button>
+  </div>
+
+  <!-- Search Results Info -->
+  <div *ngIf="searchTerm" class="search-info">
+    Showing {{filteredData.length}} of {{data.length}} products
+  </div>
+</section>
+
+<!-- Main Content -->
+<main class="main-content">
+  <!-- Add Product Button Section -->
+  <section class="action-section" *ngIf="!isFormVisible">
+    <div class="action-container">
+      <button class="btn btn-primary btn-add" type="button" (click)="showAddForm()">
+        <span class="btn-icon">➕</span>
+        Add New Product
+      </button>
+    </div>
+  </section>
+
+  <!-- Product Form Section -->
+  <section class="form-section" *ngIf="isFormVisible">
+    <div class="form-container">
+      <div class="form-header">
+        <h2 *ngIf="!isEditMode" class="form-title">
+          <span class="icon">➕</span>
+          Add New Product
+        </h2>
+        <h2 *ngIf="isEditMode" class="form-title edit-mode">
+          <span class="icon">✏️</span>
+          Update Product
+        </h2>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #productForm="ngForm" class="product-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Product Name</label>
+            <input type="text" class="form-control" name="ProductName" [(ngModel)]="newProduct.ProductName" required>
+            <span class="form-hint">Enter the name of the product</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Supplier ID</label>
+            <input type="text" class="form-control" name="SupplierID" [(ngModel)]="newProduct.SupplierID" required>
+            <span class="form-hint">Enter supplier identifier</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Category ID</label>
+            <input type="text" class="form-control" name="CategoryID" [(ngModel)]="newProduct.CategoryID" required>
+            <span class="form-hint">Enter category identifier</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Unit</label>
+            <input type="text" class="form-control" name="Unit" [(ngModel)]="newProduct.Unit" required>
+            <span class="form-hint">e.g., boxes, pieces, kg</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Price ($)</label>
+            <input type="number" step="0.01" class="form-control" name="Price" [(ngModel)]="newProduct.Price" required>
+            <span class="form-hint">Enter the price in dollars</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-success btn-submit" type="submit">
+            <span class="btn-icon">{{ isEditMode ? '✅' : '➕' }}</span>
+            {{ isEditMode ? 'Update Product' : 'Add Product' }}
+          </button>
+
+          <button class="btn btn-secondary btn-cancel" type="button" (click)="hideForm()">
+            <span class="btn-icon">❌</span>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Products List Section -->
+  <section class="products-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="icon">📋</span>
+        Products List
+        <span class="product-count">({{filteredData.length}} total products)</span>
+      </h2>
+      <div class="section-actions">
+        <button class="btn btn-info btn-refresh" (click)="viewProducts()">
+          <span class="btn-icon">🔄</span>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Page Info -->
+    <div class="page-info-top">
+      Showing {{paginatedData.length}} of {{filteredData.length}} products
+      (Page {{currentPage}} of {{totalPages}})
+    </div>
+
+    <div class="table-container">
+      <table class="products-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>Supplier</th>
+            <th>Category</th>
+            <th>Unit</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ✅ ใช้ paginatedData จริง -->
+          <tr *ngFor="let product of paginatedData; trackBy: trackByProductID">
+            <td class="text-center">{{product.ProductID}}</td>
+            <td>{{product.ProductName}}</td>
+            <td class="text-center">{{product.SupplierID}}</td>
+            <td class="text-center">{{product.CategoryID}}</td>
+            <td class="text-center">{{product.Unit}}</td>
+            <td class="text-right">${{product.Price | number:'1.2-2'}}</td>
+            <td class="text-center">
+              <button class="btn btn-warning btn-sm" (click)="editProduct(product)">
+                <span class="btn-icon">✏️</span>
+                Edit
+              </button>
+              <button class="btn btn-danger btn-sm" (click)="deleteProduct(product.ProductID)">
+                <span class="btn-icon">🗑️</span>
+                Delete
+              </button>
+            </td>
+          </tr>
+
+          <!-- No results message -->
+          <tr *ngIf="filteredData.length === 0 && searchTerm">
+            <td colspan="7" class="no-results">
+              <div class="no-results-content">
+                <span class="no-results-icon">🔍</span>
+                <h3>No products found</h3>
+                <p>No products matching "{{searchTerm}}" were found.</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Empty state when no products at all -->
+          <tr *ngIf="filteredData.length === 0 && !searchTerm && data.length === 0">
+            <td colspan="7" class="no-results">
+              <div class="no-results-content">
+                <span class="no-results-icon">📦</span>
+                <h3>No products available</h3>
+                <p>Click "Add New Product" to create your first product!</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-controls" *ngIf="totalPages > 1">
+      <div class="pagination-info">
+        Page {{currentPage}} of {{totalPages}} • {{filteredData.length}} total products
+      </div>
+
+      <div class="pagination-buttons">
+        <button class="btn btn-pagination-first" (click)="goToFirstPage()" [disabled]="currentPage === 1" aria-label="First page">
+          ⏮ First
+        </button>
+
+        <button class="btn btn-pagination-prev" (click)="previousPage()" [disabled]="currentPage === 1" aria-label="Previous page">
+          ◀ Previous
+        </button>
+
+        <div class="page-numbers">
+          <button
+            *ngFor="let page of getPageNumbers()"
+            class="btn btn-page-number"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)"
+            [attr.aria-current]="page === currentPage ? 'page' : null">
+            {{page}}
+          </button>
+        </div>
+
+        <button class="btn btn-pagination-next" (click)="nextPage()" [disabled]="currentPage === totalPages" aria-label="Next page">
+          Next ▶
+        </button>
+
+        <button class="btn btn-pagination-last" (click)="goToLastPage()" [disabled]="currentPage === totalPages" aria-label="Last page">
+          Last ⏭
+        </button>
+      </div>
+
+      <div class="items-per-page">
+        <label>Show:</label>
+        <!-- ✅ ใช้ [ngValue] ให้เป็น number + รีเซ็ตไปหน้า 1 เมื่อเปลี่ยน -->
+        <select
+          [(ngModel)]="itemsPerPage"
+          (ngModelChange)="goToFirstPage(); updatePagination()">
+          <option [ngValue]="5">5</option>
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="20">20</option>
+          <option [ngValue]="50">50</option>
+        </select>
+        <span>items per page</span>
+      </div>
+    </div>    
+  </section>
+</main>
+
+<!-- Analytics Dashboard Section -->
+<section class="analytics-section">
+  <div class="dashboard-header">
+    <h2 class="dashboard-title">
+      <span class="icon">📊</span>
+      Product Analytics
+    </h2>
+    <div class="dashboard-actions">
+      <button class="btn btn-analytics" (click)="refreshAnalytics()">
+        <span class="btn-icon">🔄</span>
+        Refresh Analytics
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-cards">
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-content">
+        <div class="stat-value">{{data.length}}</div>
+        <div class="stat-label">Total Products</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-content">
+        <div class="stat-value">${{getAveragePrice() | number:'1.2-2'}}</div>
+        <div class="stat-label">Average Price</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">🏢</div>
+      <div class="stat-content">
+        <div class="stat-value">{{getUniqueSuppliers()}}</div>
+        <div class="stat-label">Suppliers</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <div class="stat-content">
+        <div class="stat-value">{{getUniqueCategories()}}</div>
+        <div class="stat-label">Categories</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Charts Row -->
+  <div class="charts-row">
+    <!-- Price Distribution Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>💰 Price Distribution</h3>
+        <span class="chart-subtitle">How products are priced</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Category Distribution Chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <h3>📦 Products by Category</h3>
+        <span class="chart-subtitle">Category breakdown</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Section -->
+  <div class="map-section">
+    <div class="chart-card full-width">
+      <div class="chart-header">
+        <h3>📍 Supplier Locations</h3>
+        <span class="chart-subtitle">Click on markers for supplier details</span>
+      </div>
+      <div class="map-container">
+        <div id="supplierMap"></div>
+        <div class="map-controls">
+          <button class="btn btn-map-control" (click)="resetMapView()">
+            <span class="btn-icon">🗺️</span>
+            Reset View
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
