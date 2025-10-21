@@ -51,19 +51,13 @@ export class Product implements OnInit, AfterViewInit, OnDestroy {
 
   private apiUrl = 'http://localhost/ajbo';
 
-  // Demo supplier locations
-  private supplierLocations = [
-    { id: 'S001', name: 'Tech Supplies Inc.', lat: 40.7128, lng: -74.0060, products: 15, avgPrice: 45.50, type: 'high-price' },
-    { id: 'S002', name: 'Global Distributors', lat: 34.0522, lng: -118.2437, products: 8, avgPrice: 22.75, type: 'medium-price' },
-    { id: 'S003', name: 'Quality Goods Co.', lat: 41.8781, lng: -87.6298, products: 12, avgPrice: 18.30, type: 'low-price' },
-    { id: 'S004', name: 'Premium Merchants', lat: 29.7604, lng: -95.3698, products: 6, avgPrice: 75.20, type: 'high-price' },
-    { id: 'S005', name: 'Value Suppliers Ltd.', lat: 33.4484, lng: -112.0740, products: 9, avgPrice: 28.45, type: 'medium-price' }
-  ];
+  
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
     this.viewProducts();
+    
   }
 
   ngAfterViewInit() {
@@ -114,7 +108,7 @@ export class Product implements OnInit, AfterViewInit, OnDestroy {
         minZoom: 3
       }).addTo(this.supplierMap);
 
-      this.addSupplierMarkers();
+      
 
       // ⭐ สำคัญ: ให้ Leaflet คำนวณขนาดใหม่หลัง DOM เซ็ตตัว
       setTimeout(() => this.resetMapView(), 0);
@@ -133,39 +127,6 @@ export class Product implements OnInit, AfterViewInit, OnDestroy {
 });
   }
 
-  addSupplierMarkers() {
-    this.mapMarkers.forEach(marker => {
-      this.supplierMap.removeLayer(marker);
-    });
-    this.mapMarkers = [];
-
-    this.supplierLocations.forEach(supplier => {
-      let markerSize = [20, 20];
-      switch (supplier.type) {
-        case 'high-price': markerSize = [25, 25]; break;
-        case 'medium-price': markerSize = [22, 22]; break;
-        case 'low-price': markerSize = [18, 18]; break;
-      }
-
-      const customIcon = L.divIcon({
-        className: 'custom-map-marker',
-        html: `<div class="marker-pulse ${supplier.type}"></div>`,
-        iconSize: markerSize,
-        iconAnchor: [markerSize[0] / 2, markerSize[1] / 2]
-      });
-
-      const marker = L.marker([supplier.lat, supplier.lng], { icon: customIcon })
-        .addTo(this.supplierMap)
-        .bindPopup(this.createSupplierPopup(supplier));
-
-      this.mapMarkers.push(marker);
-    });
-
-    if (this.mapMarkers.length > 0) {
-      const group = new L.featureGroup(this.mapMarkers);
-      this.supplierMap.fitBounds(group.getBounds().pad(0.1));
-    }
-  }
 
   createSupplierPopup(supplier: any): string {
     return `
@@ -193,9 +154,10 @@ export class Product implements OnInit, AfterViewInit, OnDestroy {
     this.supplierMap.setView([19.028608933654667, 99.89630200733336], 15);
      }
   }
+  
 
   updateMap() {
-    this.addSupplierMarkers();
+    
     setTimeout(() => this.resetMapView(), 0);
   }
 
@@ -597,3 +559,4 @@ export class Product implements OnInit, AfterViewInit, OnDestroy {
     return product?.ProductID || index;
   }
 }
+
