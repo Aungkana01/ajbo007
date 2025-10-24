@@ -371,7 +371,7 @@ export class Product implements OnInit, AfterViewInit, OnDestroy {
   updatePagination() {
     this.totalPages = Math.ceil(this.filteredData.length / this.itemsPerPage) || 1;
     if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
-    if (this.currentPage < 1) this.currentPage = 1;
+    
 
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
@@ -559,4 +559,6 @@ export class Product implements OnInit, AfterViewInit, OnDestroy {
     return product?.ProductID || index;
   }
 }
+
+
 
